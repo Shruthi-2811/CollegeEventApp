@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Events</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>College Events</h1>
+    <p>Explore and register for upcoming events</p>
+</header>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/events.html">Events</a>
+    <a href="/register.html">Register</a>
+    <a href="/admin.html">Admin</a>
+</nav>
+
+<main class="container">
+
+    <h2>Available Events</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Venue</th>
+                <th>Registered</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="eventTable">
+            <tr>
+                <td colspan="6">Loading events...</td>
+            </tr>
+        </tbody>
+    </table>
+
+</main>
+
+<footer>
+    <p>© 2026 College Event Registration System</p>
+</footer>
+
+<script>
+    async function loadEvents() {
+        try {
+            const response = await fetch("/events");
+            const events = await response.json();
+
+            const table = document.getElementById("eventTable");
+
+            table.innerHTML = "";
+
+            events.forEach(event => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${event.eventName}</td>
+                    <td>${event.eventType}</td>
+                    <td>${formatDate(event.eventDate)}</td>
+                    <td>${event.venue}</td>
+                    <td>
+                        ${event.registered}/${event.maxParticipants}
+                    </td>
+                    <td>
+                        <a
+                            href="/register.html?event=${encodeURIComponent(event.eventName)}&type=${encodeURIComponent(event.eventType)}"
+                            class="btn"
+                        >
+                            Register Now
+                        </a>
+                    </td>
+                `;
+
+                table.appendChild(row);
+            });
+
+        } catch (error) {
+            document.getElementById("eventTable").innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        Unable to load events.
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    }
+
+    loadEvents();
+</script>
+
+</body>
+</html>

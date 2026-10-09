@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>Student Event Registration</h1>
+    <p>Register for your selected college event</p>
+</header>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/events.html">Events</a>
+    <a href="/register.html">Register</a>
+    <a href="/admin.html">Admin</a>
+</nav>
+
+<main class="form-container">
+
+    <h2>Registration Form</h2>
+
+    <form
+        action="/register"
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <label for="studentName">
+            Student Name
+        </label>
+
+        <input
+            type="text"
+            id="studentName"
+            name="studentName"
+            placeholder="Enter your full name"
+            required
+        >
+
+
+        <label for="registerNo">
+            Register Number
+        </label>
+
+        <input
+            type="text"
+            id="registerNo"
+            name="registerNo"
+            placeholder="Example: 24IT105"
+            required
+        >
+
+
+        <label for="email">
+            Email
+        </label>
+
+        <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+        >
+
+
+        <label for="department">
+            Department
+        </label>
+
+        <select
+            id="department"
+            name="department"
+            required
+        >
+            <option value="">-- Select Department --</option>
+            <option value="Information Technology">
+                Information Technology
+            </option>
+            <option value="Computer Science Engineering">
+                Computer Science Engineering
+            </option>
+            <option value="Electronics and Communication Engineering">
+                Electronics and Communication Engineering
+            </option>
+            <option value="Electrical and Electronics Engineering">
+                Electrical and Electronics Engineering
+            </option>
+            <option value="Mechanical Engineering">
+                Mechanical Engineering
+            </option>
+            <option value="Civil Engineering">
+                Civil Engineering
+            </option>
+        </select>
+
+
+        <label for="year">
+            Year
+        </label>
+
+        <select
+            id="year"
+            name="year"
+            required
+        >
+            <option value="">-- Select Year --</option>
+            <option value="1">I Year</option>
+            <option value="2">II Year</option>
+            <option value="3">III Year</option>
+            <option value="4">IV Year</option>
+        </select>
+
+
+        <label for="eventName">
+            Event Name
+        </label>
+
+        <select
+            id="eventName"
+            name="eventName"
+            required
+        >
+            <option value="">-- Select Event --</option>
+            <option value="Web Design Contest">
+                Web Design Contest
+            </option>
+            <option value="Quiz Competition">
+                Quiz Competition
+            </option>
+            <option value="Dance Competition">
+                Dance Competition
+            </option>
+        </select>
+
+
+        <label>
+            Event Type
+        </label>
+
+        <div class="radio-group">
+
+            <label>
+                <input
+                    type="radio"
+                    name="eventType"
+                    value="Technical"
+                    required
+                >
+                Technical
+            </label>
+
+            <label>
+                <input
+                    type="radio"
+                    name="eventType"
+                    value="Cultural"
+                >
+                Cultural
+            </label>
+
+        </div>
+
+
+        <label for="idCard">
+            Student ID Card
+        </label>
+
+        <input
+            type="file"
+            id="idCard"
+            name="idCard"
+            accept=".jpg,.jpeg,.png,.pdf"
+            required
+        >
+
+        <p class="file-note">
+            Accepted formats: JPG, JPEG, PNG, PDF
+            <br>
+            Maximum size: 5 MB
+        </p>
+
+
+        <button
+            type="submit"
+            class="submit-btn"
+        >
+            REGISTER
+        </button>
+
+    </form>
+
+</main>
+
+<footer>
+    <p>© 2026 College Event Registration System</p>
+</footer>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+
+    const selectedEvent = params.get("event");
+    const selectedType = params.get("type");
+
+    if (selectedEvent) {
+        document.getElementById("eventName").value =
+            selectedEvent;
+    }
+
+    if (selectedType) {
+        const radio = document.querySelector(
+            `input[name="eventType"][value="${selectedType}"]`
+        );
+
+        if (radio) {
+            radio.checked = true;
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .logout-btn:hover {
+            background: #b02a37;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-controls input,
+        .admin-controls select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            min-width: 220px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .admin-table th {
+            background: #21418f;
+            color: white;
+        }
+
+        .admin-table tr:nth-child(even) {
+            background: #f7f7f7;
+        }
+
+        .view-btn {
+            background: #198754;
+            color: white;
+            padding: 7px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .view-btn:hover {
+            background: #146c43;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background: #b02a37;
+        }
+
+        .message {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            background: #f1f1f1;
+        }
+
+        @media (max-width: 600px) {
+
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .logout-btn {
+                align-self: flex-start;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =================================================
+     HEADER
+================================================= -->
+
+<header>
+
+    <h1>College Event Registration System</h1>
+
+    <p>Administrator Dashboard</p>
+
+</header>
+
+
+<!-- =================================================
+     NAVIGATION
+================================================= -->
+
+<nav>
+
+    <a href="/">Home</a>
+
+    <a href="/events.html">Events</a>
+
+    <a href="/register.html">Register</a>
+
+    <a href="/admin.html">Admin</a>
+
+</nav>
+
+
+<!-- =================================================
+     MAIN CONTENT
+================================================= -->
+
+<main>
+
+    <!-- ADMIN HEADER -->
+
+    <div class="admin-header">
+
+        <h2>Student Registrations</h2>
+
+        <a href="/admin-logout"
+           class="logout-btn">
+            Logout
+        </a>
+
+    </div>
+
+
+    <!-- MESSAGE -->
+
+    <div id="message"
+         class="message"
+         style="display: none;">
+    </div>
+
+
+    <!-- =================================================
+         SEARCH AND FILTER
+    ================================================= -->
+
+    <div class="admin-controls">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by Register Number"
+        >
+
+        <select id="eventFilter">
+
+            <option value="">
+                All Events
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- =================================================
+         REGISTRATION TABLE
+    ================================================= -->
+
+    <div class="table-container">
+
+        <table class="admin-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>Student Name</th>
+
+                    <th>Register Number</th>
+
+                    <th>Email</th>
+
+                    <th>Department</th>
+
+                    <th>Year</th>
+
+                    <th>Event</th>
+
+                    <th>Event Type</th>
+
+                    <th>Student ID</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="registrationTable">
+
+                <tr>
+
+                    <td colspan="9">
+                        Loading registrations...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</main>
+
+
+<!-- =================================================
+     FOOTER
+================================================= -->
+
+<footer>
+
+    <p>
+        © 2026 College Event Registration System
+    </p>
+
+</footer>
+
+
+<script>
+
+
+// =====================================================
+// VARIABLES
+// =====================================================
+
+let registrations = [];
+
+
+// =====================================================
+// LOAD REGISTRATIONS
+// =====================================================
+
+async function loadRegistrations() {
+
+    try {
+
+        const response =
+            await fetch("/admin/registrations");
+
+
+        // Unauthorized user
+
+        if (response.status === 401) {
+
+            window.location.href =
+                "/admin-login";
+
+            return;
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load registrations"
+            );
+
+        }
+
+
+        registrations =
+            await response.json();
+
+
+        populateEventFilter();
+
+        displayRegistrations();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Unable to load registrations.",
+            true
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// POPULATE EVENT FILTER
+// =====================================================
+
+function populateEventFilter() {
+
+    const eventFilter =
+        document.getElementById(
+            "eventFilter"
+        );
+
+
+    const events =
+        [
+            ...new Set(
+                registrations.map(
+                    registration =>
+                        registration.eventName
+                )
+            )
+        ];
+
+
+    eventFilter.innerHTML =
+        `<option value="">
+            All Events
+        </option>`;
+
+
+    events.forEach(event => {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value = event;
+
+        option.textContent = event;
+
+        eventFilter.appendChild(
+            option
+        );
+
+    });
+
+}
+
+
+// =====================================================
+// DISPLAY REGISTRATIONS
+// =====================================================
+
+function displayRegistrations() {
+
+    const table =
+        document.getElementById(
+            "registrationTable"
+        );
+
+
+    const searchValue =
+        document.getElementById(
+            "searchInput"
+        ).value
+        .toLowerCase();
+
+
+    const selectedEvent =
+        document.getElementById(
+            "eventFilter"
+        ).value;
+
+
+    const filteredRegistrations =
+        registrations.filter(
+            registration => {
+
+                const matchesSearch =
+                    registration.registerNo
+                        .toLowerCase()
+                        .includes(searchValue);
+
+
+                const matchesEvent =
+                    selectedEvent === "" ||
+                    registration.eventName ===
+                    selectedEvent;
+
+
+                return (
+                    matchesSearch &&
+                    matchesEvent
+                );
+
+            }
+        );
+
+
+    table.innerHTML = "";
+
+
+    // No records
+
+    if (
+        filteredRegistrations.length === 0
+    ) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td colspan="9">
+
+                    No registrations found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    // Display records
+
+    filteredRegistrations.forEach(
+        registration => {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            // Convert stored path
+            // to browser URL
+
+            let filePath =
+                registration.idCard
+                    ? "/" +
+                      registration.idCard
+                        .replace(/\\/g, "/")
+                    : "";
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHTML(
+                        registration.studentName
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        registration.registerNo
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        registration.email
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        registration.department
+                    )}
+                </td>
+
+                <td>
+                    ${registration.year}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        registration.eventName
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        registration.eventType
+                    )}
+                </td>
+
+                <td>
+
+                    ${
+                        filePath
+
+                        ? `
+                            <a
+                                href="${filePath}"
+                                target="_blank"
+                                class="view-btn"
+                            >
+                                View ID
+                            </a>
+                          `
+
+                        : "No ID"
+                    }
+
+                </td>
+
+                <td>
+
+                    <button
+                        class="delete-btn"
+                        onclick="deleteRegistration(
+                            '${registration._id}'
+                        )"
+                    >
+                        Delete
+                    </button>
+
+                </td>
+
+            `;
+
+
+            table.appendChild(row);
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// DELETE REGISTRATION
+// =====================================================
+
+async function deleteRegistration(id) {
+
+    const confirmDelete =
+        confirm(
+            "Are you sure you want to delete this registration?"
+        );
+
+
+    if (!confirmDelete) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/admin/registrations/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        // Session expired
+
+        if (response.status === 401) {
+
+            window.location.href =
+                "/admin-login";
+
+            return;
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Delete failed"
+            );
+
+        }
+
+
+        showMessage(
+            "Registration deleted successfully."
+        );
+
+
+        // Reload records
+
+        loadRegistrations();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            error.message,
+            true
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// SHOW MESSAGE
+// =====================================================
+
+function showMessage(
+    message,
+    isError = false
+) {
+
+    const messageBox =
+        document.getElementById(
+            "message"
+        );
+
+
+    messageBox.textContent =
+        message;
+
+
+    messageBox.style.display =
+        "block";
+
+
+    if (isError) {
+
+        messageBox.style.background =
+            "#f8d7da";
+
+        messageBox.style.color =
+            "#842029";
+
+    } else {
+
+        messageBox.style.background =
+            "#d1e7dd";
+
+        messageBox.style.color =
+            "#0f5132";
+
+    }
+
+
+    setTimeout(() => {
+
+        messageBox.style.display =
+            "none";
+
+    }, 3000);
+
+}
+
+
+// =====================================================
+// SECURITY HELPER
+// Prevent HTML injection when displaying data
+// =====================================================
+
+function escapeHTML(value) {
+
+    if (value === null ||
+        value === undefined) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+// =====================================================
+// SEARCH EVENT
+// =====================================================
+
+document
+    .getElementById("searchInput")
+    .addEventListener(
+        "input",
+        displayRegistrations
+    );
+
+
+// =====================================================
+// FILTER EVENT
+// =====================================================
+
+document
+    .getElementById("eventFilter")
+    .addEventListener(
+        "change",
+        displayRegistrations
+    );
+
+
+// =====================================================
+// LOAD DATA WHEN PAGE OPENS
+// =====================================================
+
+loadRegistrations();
+
+
+</script>
+
+
+</body>
+
+</html>
